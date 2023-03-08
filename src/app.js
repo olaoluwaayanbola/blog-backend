@@ -9,7 +9,7 @@ const routes = require('./routes/routes');
  *
  */
 dotenv.config();
-// dbConnection()
+dbConnection()
 
 /**
  * middleware routes
