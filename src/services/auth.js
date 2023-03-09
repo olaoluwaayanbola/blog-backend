@@ -1,3 +1,4 @@
+const saltRounds = 10;
 const express = require('express');
 const Router = express.Router();
 const bcrypt = require('bcrypt');
@@ -7,7 +8,6 @@ const User = require('../models/auth');
  * register new users
  */
 Router.post('/signup', async (req, res, next) => {
-    const saltRounds = 10;
     try {
         const { username, password, email } = req.body;
         /**
@@ -47,7 +47,6 @@ Router.post('/login', async (req, res, next) => {
         if (!username || !password) {
             return res.status(400).json({ message: 'Please provide both username and password' });
         }
-
         const userDb = await User.findOne({ username });
         if (!userDb) {
             return res.status(401).json({ message: 'Invalid credentials' });
