@@ -1,30 +1,29 @@
 const mongoose = require('mongoose');
 
 const postSchema = new mongoose.Schema({
-   title: {
-      type: String,
-      required: true,
-   },
-   author: {
-      type: String,
-      required: true,
-   },
-   content: {
-      type: String,
-      required: true,
-   },
-   created_at: {
-      type: Date,
-      default: Date.now,
-   },
-   updated_at: {
-      type: Date,
-      default: Date.now,
-   },
+  title: {
+    type: String,
+    required: true,
+  },
+  content: {
+    type: String,
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now,
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
 });
 
-/**
- * this compiles the schema into a model
- * and allows you to use the schema in another files
- */
-module.exports = mongoose.model('Post', postSchema);
+const Post = mongoose.model('Post', postSchema);
+
+module.exports = Post;

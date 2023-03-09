@@ -17,6 +17,10 @@ const userSchema = new mongoose({
       type: mixed,
       required: true,
    },
+   posts: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Post',
+    }],
    created_at: {
       type: Date,
       default: Date.now,

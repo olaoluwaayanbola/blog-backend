@@ -9,24 +9,23 @@ const User = require('../models/auth');
 Router.post('/signup', async (req, res, next) => {
     const saltRounds = 10;
     try {
-        const { username, password } = req.body;
+        const { username, password, email } = req.body;
         /**
          * hash the users password
          */
-        // Validate input
         if (!username || !password) {
             return res.status(400).json({ message: 'Please provide both username and password' });
         }
         bcrypt.hash(password, saltRounds, async (err, hash) => {
             try {
-                console.log('Hash: ', hash);
                 const newUser = new User({
                     username: username,
+                    email: email,
                     password: hash,
                 });
                 const savedUser = await newUser.save();
-                // const token = jwt.sign({ userId: savedUser._id }, process.env.JWT_SECRET);
-                res.status(201).json({ savedUser });
+                const token = jwt.sign({ userId: savedUser._id },'secretKey');
+                res.status(201).json({ savedUser ,token});
             } catch (err) {
                 console.log(err);
             }
