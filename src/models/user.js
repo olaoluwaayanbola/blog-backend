@@ -14,13 +14,9 @@ const userSchema = new mongoose({
       required: true,
    },
    userPassword: {
-      type: mixed,
+      type: String,
       required: true,
    },
-   posts: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Post',
-    }],
    created_at: {
       type: Date,
       default: Date.now,
