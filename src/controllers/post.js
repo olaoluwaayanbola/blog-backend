@@ -1,17 +1,25 @@
 const express = require('express');
 const Router = express.Router();
 const Post = require('../models/post');
+const rate_limiter = require("express-rate-limit")
+
+const rate_limit = rate_limiter({
+    windowMs: 10 * 15 * 1000,
+    max: 50
+})
 
 Router.get('/:userId/posts', async (req, res, next) => {
-    try {
-        const user = req.params.userId
-        // find the post that coresponds
-        const user_post_data = await Post.find({ user })
-        res.status(200).json({ user_post_data })
-    } catch (error) {
-        console.log(error)
-        next()
-    }
+    rate_limit(res, req, async () => {
+        try {
+            const user = req.params.userId
+            // find the post that coresponds
+            const user_post_data = await Post.find({ user })
+            res.status(200).json({ user_post_data })
+        } catch (error) {
+            console.log(error)
+            next()
+        }
+    })
 })
 Router.post('/:userId/post', async (req, res, next) => {
     try {
@@ -44,7 +52,7 @@ Router.put('/:userId/post/update/:postId', async (req, res, next) => {
     try {
         const postId = req.params.postId
         const { title, content } = req.body
-        const user_data = await Post.updateOne({ _id: postId }, { $set: { title: title, content: content } })
+        const user_data = await Post.updateOne({ _id: postId }, { $set: { title, content } })
         res.status(200).json({ user_data })
     } catch (error) {
         console.log(error)
@@ -66,7 +74,7 @@ Router.delete('/:userId/post/delete/:postId', async (req, res, next) => {
 Router.delete('/:userId/post/deleteall/:postId', async (req, res, next) => {
     try {
         const _id = req.params.userId
-        const user_data = await Post.deleteMany({user:_id})
+        const user_data = await Post.deleteMany({ user: _id })
         res.status(200).json(user_data)
     } catch (error) {
         console.log(error)

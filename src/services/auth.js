@@ -24,7 +24,7 @@ Router.post('/signup', async (req, res, next) => {
                     password: hash,
                 });
                 const savedUser = await newUser.save();
-                const token = jwt.sign({ userId: savedUser._id },'secretKey');
+                const token = jwt.sign({ userId: savedUser._id },process.env.SECRET_KEY);
                 res.status(201).json({ savedUser ,token});
             } catch (err) {
                 console.log(err);
