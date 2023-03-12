@@ -2,8 +2,8 @@ const express = require('express');
 const app = express();
 const dbConnection = require('./config/db');
 const dotenv = require('dotenv');
-const middlewares = require('./routes/middleware');
 const routes = require('./routes/routes');
+const middlewares = require('./middleware/middleware');
 
 /**
  *
