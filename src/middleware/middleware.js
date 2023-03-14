@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const express = require('express');
 const app = express();
 
+/** ==> dont forget to add some configuration */
 app.use(cors());
 app.use(helmet());
 app.use(morgan('dev'));
