@@ -4,7 +4,7 @@ const Post = require('../models/post');
 const rate_limiter = require('express-rate-limit');
 const authorization = require('../services/authorization');
 /**
- * @des
+ * @description
  * ---limits the rate at which a person can call an endpoint it is a simple security measure
  */
 const rate_limit = rate_limiter({
@@ -28,12 +28,12 @@ Router.get('/posts', authorization, async (req, res, next) => {
          }
       });
    } catch (err) {
-      res.send(500).json({ message: error });
+      res.send(500).json({ message: err });
    }
 });
 
 /**
- * @des
+ * @description
  * ---This endpoint allows user to create a post
  */
 Router.post('/post', authorization, async (req, res) => {
@@ -59,83 +59,97 @@ Router.post('/post', authorization, async (req, res) => {
 });
 
 /**
- * @des
+ * @description
  * ---this is where a user can fetch a particular post
- * im going to get a response from JWT with the user name ad id
  */
 Router.get('/post/:postId', authorization, async (req, res, next) => {
    try {
-      const postdata = await Post.find({ _id: req.user });
+      const postId = req.params.postId;
+      const postdata = await Post.find({ _id: postId, user: req.user });
       res.status(200).json({ postdata });
    } catch (error) {
-      res.send(500).json({ message: error });
+      res.status(500).json({ message: error });
       next(error);
    }
 });
 
 /**
- * @des
- * ---this is where all the posts for a particular user is sent
- * so im currently using the param to fetch the the post from the user
+ * @description
+ * ---this enpoint allows us to make updates to the post
  */
 Router.put('/post/update/:postId', authorization, async (req, res, next) => {
    try {
       const postId = req.params.postId;
       const { title, content } = req.body;
+      if (!title || !content) {
+         return res
+            .status(400)
+            .json({ message: 'Title and content are required.' });
+      }
+      const post = await Post.findById(postId);
+      if (!post) {
+         return res.status(404).json({ message: 'Post not found.' });
+      }
+      if (post.user.toString() !== req.user) {
+         return res
+            .status(403)
+            .json({ message: 'You are not authorized to update this post.' });
+      }
+
       const user_data = await Post.updateOne(
          { _id: postId },
          { $set: { title, content } },
       );
       res.status(200).json({ user_data });
    } catch (error) {
+      console.error(error);
+      if (error.name === 'CastError') {
+         return res.status(400).json({ message: 'Invalid post ID.' });
+      }
+      res.status(500).json({ message: error });
+      next(error);
+   }
+});
+
+/**
+ * @description
+ * ---this is endppoint allows you to delete aparticular post
+ */
+Router.delete('/post/delete/:postId', authorization, async (req, res, next) => {
+   try {
+      const postId = req.params.postId;
+      const userId = req.user;
+      const user_data = await Post.findByIdAndDelete({
+         _id: postId,
+         user: userId,
+      });
+      if (!user_data) {
+         return res.status(404).json({ message: 'Post not found' });
+      }
+      res.status(200).json({ message: erro, user_data });
+   } catch (error) {
+      res.status(500).json({ message: error });
+      next(error);
+   }
+});
+
+/**
+ * @description
+ *---this is endppoint allows you to delete all the users post
+ */
+Router.delete('/post/deleteall', authorization, async (req, res, next) => {
+   try {
+      const user_data = await Post.deleteMany({ user: req.user });
+      res.status(200).json(user_data);
+   } catch (error) {
       res.send(500).json({ message: error });
       next(error);
    }
 });
 
 /**
- * @des
- * ---this is where all the posts for a particular user is sent
- * so im currently using the param to fetch the the post from the user
- */
-Router.delete(
-   '/:userId/post/delete/:postId',
-   authorization,
-   async (req, res, next) => {
-      try {
-         const postId = req.params.postId;
-         const user_data = await Post.findByIdAndDelete({ _id: postId });
-         res.status(200).json(user_data);
-      } catch (error) {
-         console.log(error);
-         next();
-      }
-   },
-);
-
-/**
- * @des
- * ---this is where all the posts for a particular user is sent
- * so im currently using the param to fetch the the post from the user
- */
-Router.delete(
-   '/post/deleteall/:postId',
-   authorization,
-   async (req, res, next) => {
-      try {
-         const user_data = await Post.deleteMany({ user: req.user });
-         res.status(200).json(user_data);
-      } catch (error) {
-         res.send(500).json({ message: error });
-         next(error);
-      }
-   },
-);
-
-/**
- * @des
- * ---this is where all the posts for a particular user is sent
- * so im currently using the param to fetch the the post from the user
+ * @description
+ * ---this is handles the error  well im mot really handling it lol
  */
 Router.use((err, req, res, next) => {
    console.error(err.stack);
