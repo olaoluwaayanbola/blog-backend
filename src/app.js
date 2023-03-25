@@ -16,7 +16,9 @@ dbConnection();
  */
 app.use(middlewares);
 
-// routes
+/**
+ * routes
+ */
 app.use(routes);
 
 app.listen(9000, () => {
