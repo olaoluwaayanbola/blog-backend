@@ -29,6 +29,7 @@ Router.post('/signup', async (req, res, next) => {
             const token = jwt.sign(
                { userId: savedUser },
                process.env.SECRET_KEY,
+               // {expiresIn:4hr}
             );
             res.status(201).json({ token });
          } catch (err) {
@@ -47,7 +48,8 @@ Router.post('/login', async (req, res, next) => {
    try {
       const { username, password } = req.body;
       /**
-       * get the data from the server using the current username
+       *@params 
+       *  get the data from the server using the current username
        */
       if (!username || !password) {
          return res
@@ -69,8 +71,12 @@ Router.post('/login', async (req, res, next) => {
             })
             .catch((err) => console.error(err.message));
       };
-      validateUser(userDb.password);
-      res.status(200).send({ userDb });
+      const token = jwt.sign({ userDb }, process.env.SECRET_KEY)
+      if (validateUser(userDb.password)) {
+         return res.status(200).send({ message: "success", userDb, token });
+      } else {
+         return res.status(401).send({ message: "unauthorised" });
+      }
    } catch (err) {
       next(err);
    }
